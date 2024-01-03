@@ -1,0 +1,22 @@
+# dir with text files to index for
+sourceDir: ./resources
+
+# dir to save index
+indexDir: ./idx
+
+# full scan algorithm
+# 0 - Wu-Manber
+# 1 - Harspool
+scan: 0
+
+# HashMappedArrayTree settings
+hamt:
+  # use hamt in memory. if false only btree is going to be used to store index
+  useHAMT: true
+  # active threshold defines number of operations after we start to put data in btree in parallel
+  activeThreshold: 5000
+  # defines custom settings for HAMT, false by default
+  useCustomHAMTSettings: false
+  customHAMTSettings:
+    # size of hashmap, that WON'T be resized when we reach fulfill (no fill factor)
+    hashMapSize: 64
