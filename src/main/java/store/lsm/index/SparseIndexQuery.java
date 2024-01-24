@@ -1,6 +1,7 @@
 package store.lsm.index;
 
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import store.lsm.block.Block;
 import store.lsm.block.impl.BlockOperation;
 
@@ -9,9 +10,9 @@ import java.io.RandomAccessFile;
 import java.util.LinkedList;
 
 public class SparseIndexQuery {
-    private SparseIndex index;
-    private RandomAccessFile tableFile;
-    private LinkedList<IndexPosition> sparseKeyPositionList = new LinkedList<>();
+    private final SparseIndex index;
+    private final RandomAccessFile tableFile;
+    private final LinkedList<IndexPosition> sparseKeyPositionList = new LinkedList<>();
     private IndexPosition lastSmallPosition = null;
     private IndexPosition firstBigPosition = null;
 
@@ -52,7 +53,7 @@ public class SparseIndexQuery {
 
         IndexPosition firstKeyPosition = sparseKeyPositionList.getFirst();
         IndexPosition lastKeyPosition = sparseKeyPositionList.getLast();
-        long start = 0, len = 0;
+        long start, len;
         start = firstKeyPosition.start;
         if (firstKeyPosition.equals(lastKeyPosition)) {
             len = firstKeyPosition.len;
@@ -64,12 +65,15 @@ public class SparseIndexQuery {
 
         int pStart = 0;
 
+        ObjectMapper mapper = new ObjectMapper();
         for (IndexPosition position : sparseKeyPositionList) {
-            JSONObject segmentJson = JSONObject.parseObject(new String(segment, pStart, (int) position.len));
-            if (segmentJson.containsKey(key)) {
-                JSONObject value = segmentJson.getJSONObject(key);
+            ObjectNode segmentJson = (ObjectNode) mapper.readTree(segment, pStart, (int) position.len);
+
+            if (segmentJson.findValue(key) != null){
+                ObjectNode value = mapper.readValue(segmentJson.findValue(key).asText(), ObjectNode.class);
                 return BlockOperation.toBlock(value);
             }
+
             pStart += (int) position.len;
         }
         return null;

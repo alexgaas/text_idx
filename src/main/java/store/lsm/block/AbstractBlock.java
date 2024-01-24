@@ -1,7 +1,9 @@
 package store.lsm.block;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import store.lsm.block.impl.BlockOperation;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 public abstract class AbstractBlock implements Block {
     public BlockOperation.BlockOperationType type;
@@ -12,6 +14,12 @@ public abstract class AbstractBlock implements Block {
 
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectWriter objectWrapper = mapper.writer();
+        try {
+            return objectWrapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

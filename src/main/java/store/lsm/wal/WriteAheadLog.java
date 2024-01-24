@@ -1,12 +1,9 @@
 package store.lsm.wal;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import store.lsm.block.Block;
 import store.lsm.block.impl.BlockOperation;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.TreeMap;
 
 public class WriteAheadLog extends RandomAccessFile implements Closeable {
@@ -14,8 +11,8 @@ public class WriteAheadLog extends RandomAccessFile implements Closeable {
     private static final String WRITE_AHEAD_LOG = "log";
     private static final String WRITE_AHEAD_LOG_TMP = "logTmp";
 
-    private RandomAccessFile writeAheadLog;
-    private File walFile;
+    private final RandomAccessFile writeAheadLog;
+    private final File walFile;
 
     public WriteAheadLog(String dataDir) throws FileNotFoundException {
         super(new File(dataDir + WRITE_AHEAD_LOG), FILE_MODE);
@@ -37,8 +34,8 @@ public class WriteAheadLog extends RandomAccessFile implements Closeable {
             int valueLen = writeAheadLog.readInt();
             byte[] bytes = new byte[valueLen];
             writeAheadLog.read(bytes);
-            JSONObject value = JSON.parseObject(new String(bytes, StandardCharsets.UTF_8));
-            Block block = BlockOperation.toBlock(value);
+
+            Block block = BlockOperation.toBlock(bytes);
             if (block != null) {
                 index.put(block.getKey(), block);
             }

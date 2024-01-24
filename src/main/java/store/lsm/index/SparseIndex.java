@@ -1,6 +1,5 @@
 package store.lsm.index;
 
-import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -8,21 +7,12 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class SparseIndex extends AbstractMap<String, IndexPosition> implements Serializable {
-    private TreeMap<String, IndexPosition> index;
+public class SparseIndex extends AbstractMap<String, IndexPosition> {
+    private final TreeMap<String, IndexPosition> index;
 
     public SparseIndex(){
         super();
         this.index = new TreeMap<>();
-    }
-
-    private SparseIndex(TreeMap<String, IndexPosition> index){
-        super();
-        this.index = index;
-    }
-
-    public static SparseIndex getFromTypedIndex(TreeMap<String, IndexPosition> index){
-        return new SparseIndex(index);
     }
 
     @Override

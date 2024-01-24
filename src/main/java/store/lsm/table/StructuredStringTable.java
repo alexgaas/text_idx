@@ -1,8 +1,9 @@
 package store.lsm.table;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import store.lsm.block.Block;
+
 import store.lsm.block.impl.RmBlock;
 import store.lsm.block.impl.StBlock;
 import store.lsm.index.IndexPosition;
@@ -72,24 +73,28 @@ public class StructuredStringTable implements Closeable {
         tableFile.read(indexBytes);
         String indexStr = new String(indexBytes, StandardCharsets.UTF_8);
 
-        this.sparseIndex = SparseIndex
-                .getFromTypedIndex(JSONObject.parseObject(indexStr, new TypeReference<>(){}));
-
+        ObjectMapper mapper = new ObjectMapper();
+        //var t = mapper.readValue(indexStr, SparseIndex.class);
+        this.sparseIndex = mapper.readValue(indexStr, SparseIndex.class);
         this.tableMetaData = tableMetaData;
     }
 
     private void initFromIndex(TreeMap<String, Block> index) throws IOException {
-        JSONObject segment = new JSONObject(true);
+        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectNode segment = mapper.createObjectNode();
+
+
         tableMetaData.dataStart = tableFile.getFilePointer();
         for (Block command : index.values()) {
             if (command instanceof StBlock) {
                 StBlock set = (StBlock) command;
-                segment.put(set.getKey(), set);
+                segment.put(set.getKey(), set.toString());
             }
 
             if (command instanceof RmBlock) {
                 RmBlock rm = (RmBlock) command;
-                segment.put(rm.getKey(), rm);
+                segment.put(rm.getKey(), rm.toString());
             }
 
             if (segment.size() >= tableMetaData.segmentSize) {
@@ -101,8 +106,8 @@ public class StructuredStringTable implements Closeable {
             writeSegment(segment);
         }
         tableMetaData.dataLen = tableFile.getFilePointer() - tableMetaData.dataStart;
+        byte[] indexBytes = mapper.writeValueAsBytes(sparseIndex);
 
-        byte[] indexBytes = JSONObject.toJSONString(sparseIndex).getBytes(StandardCharsets.UTF_8);
         tableMetaData.indexStart = tableFile.getFilePointer();
         tableFile.write(indexBytes);
         tableMetaData.indexLen = indexBytes.length;
@@ -110,14 +115,17 @@ public class StructuredStringTable implements Closeable {
         tableMetaData.write(tableFile);
     }
 
-    private void writeSegment(JSONObject partData) throws IOException {
-        byte[] partDataBytes = partData.toJSONString().getBytes(StandardCharsets.UTF_8);
-        long start = tableFile.getFilePointer();
-        tableFile.write(partDataBytes);
+    private void writeSegment(ObjectNode segment) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        byte[] bytes = mapper.writeValueAsBytes(segment);
 
-        Optional<String> firstKey = partData.keySet().stream().findFirst();
-        firstKey.ifPresent(s -> sparseIndex.put(s, new IndexPosition(start, partDataBytes.length)));
-        partData.clear();
+        long start = tableFile.getFilePointer();
+        tableFile.write(bytes);
+
+        Optional<String> firstKey = Optional.ofNullable(segment.fields().next().getKey());
+        firstKey.ifPresent(s -> sparseIndex.put(s, new IndexPosition(start, bytes.length)));
+
+        segment.removeAll();
     }
 
     @Override

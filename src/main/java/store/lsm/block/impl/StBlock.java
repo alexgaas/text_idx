@@ -6,6 +6,10 @@ public class StBlock extends AbstractBlock {
     public String key;
     public String value;
 
+    public StBlock() {
+        super(BlockOperation.BlockOperationType.REMOVE);
+    }
+
     public StBlock(String key, String value) {
         super(BlockOperation.BlockOperationType.SET);
         this.key = key;
