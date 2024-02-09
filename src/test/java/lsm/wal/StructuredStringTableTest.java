@@ -1,4 +1,4 @@
-package lsm;
+package lsm.wal;
 
 import store.lsm.block.Block;
 import store.lsm.block.impl.RmBlock;

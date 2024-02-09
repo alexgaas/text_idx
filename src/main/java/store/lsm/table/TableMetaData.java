@@ -2,6 +2,9 @@ package store.lsm.table;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
 
 public class TableMetaData {
     private static final int LONG_SIZE_64 = 8;
