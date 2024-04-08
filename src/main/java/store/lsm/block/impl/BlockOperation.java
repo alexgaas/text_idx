@@ -12,6 +12,7 @@ public class BlockOperation {
 
     public static Block toBlock(JsonNode value) {
         ObjectMapper mapper = new ObjectMapper();
+        // serialize to [StBlock] or [RmBlock] based on type [SET / REMOVE]
         if (value.findValue(TYPE).asText().equals(BlockOperationType.SET.name())) {
             return  mapper.convertValue(value, StBlock.class);
         } else if (value.findValue(TYPE).asText().equals(BlockOperationType.REMOVE.name())) {

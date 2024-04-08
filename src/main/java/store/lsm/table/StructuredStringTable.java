@@ -6,6 +6,7 @@ import store.lsm.block.Block;
 
 import store.lsm.block.impl.RmBlock;
 import store.lsm.block.impl.StBlock;
+import store.lsm.index.Index;
 import store.lsm.index.IndexPosition;
 import store.lsm.index.SparseIndex;
 import store.lsm.index.SparseIndexQuery;
@@ -40,13 +41,13 @@ public class StructuredStringTable implements Closeable {
         tableFile.seek(0);
     }
 
-    private static StructuredStringTable fromIndex(String filePath, int partSize, TreeMap<String, Block> index) throws IOException {
+    private static StructuredStringTable fromIndex(String filePath, int partSize, Index index) throws IOException {
         StructuredStringTable ssTable = new StructuredStringTable(filePath, partSize);
         ssTable.initFromIndex(index);
         return ssTable;
     }
 
-    public static StructuredStringTable createFromIndex(String dataDir, int segmentSize, TreeMap<String, Block> index) throws IOException {
+    public static StructuredStringTable createFromIndex(String dataDir, int segmentSize, Index index) throws IOException {
         return fromIndex(dataDir + System.currentTimeMillis() + TABLE, segmentSize, index);
     }
 
@@ -74,16 +75,13 @@ public class StructuredStringTable implements Closeable {
         String indexStr = new String(indexBytes, StandardCharsets.UTF_8);
 
         ObjectMapper mapper = new ObjectMapper();
-        //var t = mapper.readValue(indexStr, SparseIndex.class);
         this.sparseIndex = mapper.readValue(indexStr, SparseIndex.class);
         this.tableMetaData = tableMetaData;
     }
 
     private void initFromIndex(TreeMap<String, Block> index) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-
         ObjectNode segment = mapper.createObjectNode();
-
 
         tableMetaData.dataStart = tableFile.getFilePointer();
         for (Block command : index.values()) {
@@ -131,6 +129,14 @@ public class StructuredStringTable implements Closeable {
     @Override
     public void close() throws IOException {
         tableFile.close();
+    }
+
+    public RandomAccessFile GetTableFile(){
+        return tableFile;
+    }
+
+    public SparseIndex GetSparseIndex(){
+        return sparseIndex;
     }
 }
 

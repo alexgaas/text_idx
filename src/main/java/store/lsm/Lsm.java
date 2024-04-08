@@ -4,6 +4,7 @@ import store.lsm.block.Block;
 import store.lsm.block.impl.BlockOperation;
 import store.lsm.block.impl.RmBlock;
 import store.lsm.block.impl.StBlock;
+import store.lsm.index.Index;
 import store.lsm.table.StructuredStringTable;
 import store.lsm.wal.WriteAheadLog;
 
@@ -16,9 +17,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.io.File;
 
 public class Lsm implements Store {
-    private TreeMap<String, Block> index;
+    private Index index;
 
-    private TreeMap<String, Block> immutableIndex;
+    private Index immutableIndex;
 
     private final LinkedList<StructuredStringTable> tables;
 
@@ -39,7 +40,7 @@ public class Lsm implements Store {
             this.indexLock = new ReentrantReadWriteLock();
 
             tables = new LinkedList<>();
-            index = new TreeMap<>();
+            index = new Index();
 
             File dir = new File(dataDir);
             File[] files = dir.listFiles((file, name) -> !name.equals(".DS_Store"));
@@ -96,7 +97,7 @@ public class Lsm implements Store {
         try {
             indexLock.writeLock().lock();
             immutableIndex = index;
-            index = new TreeMap<>();
+            index = new Index();
             writeAheadLog.close();
 
             writeAheadLog.renameLogFileToCopy();

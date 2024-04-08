@@ -3,6 +3,7 @@ package lsm.wal;
 import store.lsm.block.Block;
 import store.lsm.block.impl.RmBlock;
 import store.lsm.block.impl.StBlock;
+import store.lsm.index.Index;
 import store.lsm.table.StructuredStringTable;
 import org.junit.Test;
 
@@ -12,7 +13,7 @@ import java.util.TreeMap;
 public class StructuredStringTableTest {
     @Test
     public void testTable() throws IOException {
-        TreeMap<String, Block> index = new TreeMap<>();
+        Index index = new Index();
         for (int i = 0; i < 10; i++) {
             StBlock stBlock = new StBlock("key" + i, "value" + i);
             index.put(stBlock.getKey(), stBlock);
