@@ -21,13 +21,6 @@ public class SparseIndexQuery {
         this.tableFile = tableFile;
     }
 
-    byte[] readSegment(long start, long len) throws IOException {
-        byte[] segment = new byte[(int) len];
-        tableFile.seek(start);
-        tableFile.read(segment);
-        return segment;
-    }
-
     public void setPositionListByKey(String key){
         for (String k : index.keySet()) {
             if (k.compareTo(key) <= 0) {
@@ -45,9 +38,17 @@ public class SparseIndexQuery {
         }
     }
 
-    byte[] getSegment() throws IOException {
+    byte[] readSegment(long start, long len) throws IOException {
+        byte[] segment = new byte[(int) len];
+        tableFile.seek(start);
+        tableFile.read(segment);
+        return segment;
+    }
+
+    public byte[] getSegmentBySparseIndex() throws IOException {
         IndexPosition firstKeyPosition = sparseKeyPositionList.getFirst();
         IndexPosition lastKeyPosition = sparseKeyPositionList.getLast();
+
         long start, len;
         start = firstKeyPosition.start;
         if (firstKeyPosition.equals(lastKeyPosition)) {
@@ -55,6 +56,7 @@ public class SparseIndexQuery {
         } else {
             len = lastKeyPosition.start + lastKeyPosition.len - start;
         }
+
         return readSegment(start, len);
     }
 
@@ -64,7 +66,7 @@ public class SparseIndexQuery {
             return null;
         }
 
-        byte[] segment = getSegment();
+        byte[] segment = getSegmentBySparseIndex();
 
         int pStart = 0;
         ObjectMapper mapper = new ObjectMapper();
