@@ -1,10 +1,10 @@
 package lsm;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import store.lsm.Store;
 import store.lsm.Lsm;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;

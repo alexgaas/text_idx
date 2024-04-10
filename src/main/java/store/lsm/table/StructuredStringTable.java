@@ -27,6 +27,7 @@ public class StructuredStringTable implements Closeable {
 
     private SparseIndex sparseIndex;
 
+    @Deprecated
     private RandomAccessFile tableFile;
 
     private final String filePath;
@@ -82,7 +83,7 @@ public class StructuredStringTable implements Closeable {
         this.tableMetaData = tableMetaData;
     }
 
-    private void initFromIndex(TreeMap<String, Block> index) throws IOException {
+    private void initFromIndex(Index index) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode segment = mapper.createObjectNode();
 

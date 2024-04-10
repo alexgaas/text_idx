@@ -46,7 +46,7 @@ public class TableMetaData {
         for(long value: values){
             b.putLong(value);
         }
-        return  b.flip();
+        return b.flip();
     }
 
     public void write() {
@@ -70,7 +70,7 @@ public class TableMetaData {
         return b.flip().getLong();
     }
 
-    public static TableMetaData read(Path path) throws IOException {
+    public static TableMetaData read(Path path) {
         TableMetaData tableMetaData = new TableMetaData();
         try(FileChannel ch = FileChannel.open(path, READ)){
             long fileLen = ch.size();

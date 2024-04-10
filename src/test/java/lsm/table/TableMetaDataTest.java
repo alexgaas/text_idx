@@ -1,7 +1,7 @@
 package lsm.table;
 
-import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import store.lsm.table.TableMetaData;
 
 import java.io.File;

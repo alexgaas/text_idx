@@ -3,7 +3,7 @@ package lsm.block;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import store.lsm.block.Block;
 import store.lsm.block.impl.BlockOperation;
 import store.lsm.block.impl.RmBlock;
