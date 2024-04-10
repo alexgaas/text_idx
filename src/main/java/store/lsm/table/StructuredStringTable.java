@@ -21,12 +21,10 @@ import java.util.TreeMap;
 
 public class StructuredStringTable implements Closeable {
     private static final String TABLE = ".table";
+    @Deprecated
     private static final String FILE_MODE = "rw";
-
     private TableMetaData tableMetaData;
-
     private SparseIndex sparseIndex;
-
     @Deprecated
     private RandomAccessFile tableFile;
 
@@ -36,7 +34,9 @@ public class StructuredStringTable implements Closeable {
         this.tableMetaData = new TableMetaData();
         this.tableMetaData.segmentSize = segmentSize;
         this.filePath = filePath;
+
         initTableFileToZeroPosition(filePath);
+
         sparseIndex = new SparseIndex();
     }
 

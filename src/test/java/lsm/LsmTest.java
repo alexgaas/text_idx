@@ -1,33 +1,45 @@
 package lsm;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import store.lsm.Store;
 import store.lsm.Lsm;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.IntStream;
+import java.util.Arrays;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class LsmTest {
-    @BeforeAll
-    public void setup() throws IOException {
-        Files.delete(Path.of("src/test/resources/"));
+    private static final String baseTestPath = "./src/test/resources/lsm/";
+
+    @AfterEach
+    public void removeTestTable() {
+        Arrays.stream(Objects.requireNonNull(new File(baseTestPath).listFiles())).forEach(File::delete);
     }
 
     @Test
     public void basicLsmTest() throws IOException {
-        Store lsm = new Lsm("src/test/resources/", 4, 3);
+        Store lsm = new Lsm(baseTestPath, 4, 3);
 
-        IntStream.range(0, 11).forEachOrdered(i -> lsm.put(i + "", i + ""));
-        IntStream.range(0, 11).forEachOrdered(i -> assertEquals(i + "", lsm.get(i + "")));
-        IntStream.range(0, 11).mapToObj(i -> i + "").forEachOrdered(lsm::remove);
-        IntStream.range(0, 11).mapToObj(i -> lsm.get(i + "")).forEachOrdered(Assertions::assertNull);
+        // put test data
+        for (int i1 = 0; i1 < 10; i1++) {
+            lsm.put(String.valueOf(i1), String.valueOf(i1));
+        }
+        // assert data in the LSM store
+        for (int i1 = 0; i1 < 10; i1++) {
+            assertEquals(String.valueOf(i1), lsm.get(String.valueOf(i1)));
+        }
+        // remove data from LSM store
+        for (int i1 = 0; i1 < 10; i1++) {
+            String s = String.valueOf(i1);
+            lsm.remove(s);
+        }
+        // assert data have been removed
+        for (int i = 0; i < 10; i++) {
+            String s = lsm.get(String.valueOf(i));
+            Assertions.assertNull(s);
+        }
 
         lsm.close();
     }

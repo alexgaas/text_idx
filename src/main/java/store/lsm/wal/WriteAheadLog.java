@@ -2,15 +2,17 @@ package store.lsm.wal;
 
 import store.lsm.block.Block;
 import store.lsm.block.impl.BlockOperation;
+import store.lsm.index.Index;
 
 import java.io.*;
 import java.util.TreeMap;
 
 public class WriteAheadLog extends RandomAccessFile implements Closeable {
+    @Deprecated
     private static final String FILE_MODE = "rw";
     private static final String WRITE_AHEAD_LOG = "log";
     private static final String WRITE_AHEAD_LOG_TMP = "logTmp";
-
+    @Deprecated
     private final RandomAccessFile writeAheadLog;
     private final File walFile;
 
@@ -26,11 +28,11 @@ public class WriteAheadLog extends RandomAccessFile implements Closeable {
         this.writeAheadLog = new RandomAccessFile(walFile, FILE_MODE);
     }
 
-    public void restoreFromLog(TreeMap<String, Block> index) throws IOException {
-        long len = writeAheadLog.length();
+    @Deprecated
+    public void restoreFromLog(Index index) throws IOException {
         long start = 0;
         writeAheadLog.seek(start);
-        while (start < len) {
+        while (start < writeAheadLog.length()) {
             int valueLen = writeAheadLog.readInt();
             byte[] bytes = new byte[valueLen];
             writeAheadLog.read(bytes);
@@ -43,6 +45,12 @@ public class WriteAheadLog extends RandomAccessFile implements Closeable {
             start += valueLen;
         }
         writeAheadLog.seek(writeAheadLog.length());
+    }
+
+    public Index restoreFromLog() throws IOException {
+        Index index = new Index();
+        restoreFromLog(index);
+        return index;
     }
 
     public void renameLogFileToCopy(){

@@ -68,6 +68,7 @@ As you may see:
  */
 public class SparseIndexTest {
     private static final String baseTestPath = "./src/test/resources/sparse_index/";
+    private static final String fileName = String.valueOf(System.currentTimeMillis());
 
     @Test
     public void testSetPositionList() throws FileNotFoundException {
@@ -87,7 +88,7 @@ public class SparseIndexTest {
                                    4^            8^
             9 - [], ..., 12 - [], ..., 15 - []
          */
-        SparseIndexQuery query = new SparseIndexQuery(index, new RandomAccessFile(baseTestPath, "rw"));
+        SparseIndexQuery query = new SparseIndexQuery(index, new RandomAccessFile(baseTestPath + fileName, "rw"));
         query.setPositionListByKey("4"); // 0 - [], ..., 3  - []
         query.setPositionListByKey("8"); // 3  - [], ..., 6  - []
 
