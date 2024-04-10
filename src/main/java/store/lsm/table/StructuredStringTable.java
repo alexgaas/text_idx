@@ -29,9 +29,12 @@ public class StructuredStringTable implements Closeable {
 
     private RandomAccessFile tableFile;
 
+    private final String filePath;
+
     private StructuredStringTable(String filePath, int segmentSize) throws IOException {
         this.tableMetaData = new TableMetaData();
         this.tableMetaData.segmentSize = segmentSize;
+        this.filePath = filePath;
         initTableFileToZeroPosition(filePath);
         sparseIndex = new SparseIndex();
     }
@@ -132,11 +135,13 @@ public class StructuredStringTable implements Closeable {
     }
 
     public RandomAccessFile GetTableFile(){
-        return tableFile;
+        return this.tableFile;
     }
 
     public SparseIndex GetSparseIndex(){
-        return sparseIndex;
+        return this.sparseIndex;
     }
+
+    public String GetFilePath() { return this.filePath; }
 }
 

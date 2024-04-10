@@ -14,7 +14,9 @@ import store.lsm.index.SparseIndexQuery;
 import store.lsm.table.StructuredStringTable;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -66,8 +68,9 @@ As you may see:
  */
 public class SparseIndexTest {
     private static final String baseTestPath = "./src/test/resources/sparse_index/";
+
     @Test
-    public void testSetPositionList(){
+    public void testSetPositionList() throws FileNotFoundException {
         SparseIndex index = new SparseIndex();
         // 0, 3, 6
         index.put("0", new IndexPosition(0, 4));
@@ -84,7 +87,7 @@ public class SparseIndexTest {
                                    4^            8^
             9 - [], ..., 12 - [], ..., 15 - []
          */
-        SparseIndexQuery query = new SparseIndexQuery(index, null);
+        SparseIndexQuery query = new SparseIndexQuery(index, new RandomAccessFile(baseTestPath, "rw"));
         query.setPositionListByKey("4"); // 0 - [], ..., 3  - []
         query.setPositionListByKey("8"); // 3  - [], ..., 6  - []
 

@@ -12,6 +12,7 @@ import store.lsm.table.StructuredStringTable;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -43,10 +44,37 @@ public class SparseIndexIntegrationTest {
     }
 
     @Test
-    public void testQueryByKey() throws IOException {
+    @Deprecated
+    public void testQueryByKeyDeprecated() throws IOException {
         SparseIndex sparseIndex = table.GetSparseIndex();
         RandomAccessFile tableFile = table.GetTableFile();
         SparseIndexQuery idxQuery = new SparseIndexQuery(sparseIndex, tableFile);
+
+        /* let's find [key4]
+
+            for k in [key0, key3, key6]
+             if k compareTo key <= 0
+                fill lastSmallPosition
+             else
+                fill firstBigPosition
+
+            1: latestMinimalPosition = key0, earliestMaximalPosition = null
+            2: latestMinimalPosition = key3, earliestMaximalPosition = null
+            3: latestMinimalPosition = key3, earliestMaximalPosition = key6
+         */
+
+        String key = "key4";
+        var result = idxQuery.queryByKey(key);
+
+        assertEquals(key, result.getKey());
+
+    }
+
+    @Test
+    public void testQueryByKey() throws IOException {
+        SparseIndex sparseIndex = table.GetSparseIndex();
+        // RandomAccessFile tableFile = table.GetTableFile();
+        SparseIndexQuery idxQuery = new SparseIndexQuery(sparseIndex, Path.of(table.GetFilePath()));
 
         /* let's find [key4]
 

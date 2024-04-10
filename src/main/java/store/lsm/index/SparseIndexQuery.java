@@ -7,18 +7,40 @@ import store.lsm.block.impl.BlockOperation;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import java.util.LinkedList;
+
+import static java.nio.file.StandardOpenOption.*;
 
 public class SparseIndexQuery {
     private final SparseIndex index;
+
+    @Deprecated
     private final RandomAccessFile tableFile;
+
+    private final Path tableFilePath;
+
+    private final Boolean switchToFileChannel;
+
     private final LinkedList<IndexPosition> sparseKeyPositionList = new LinkedList<>();
     private IndexPosition latestMinimalPosition = null;
     private IndexPosition earliestMaximalPosition = null;
 
+    @Deprecated
     public SparseIndexQuery(SparseIndex index, RandomAccessFile tableFile){
         this.index = index;
+        this.switchToFileChannel = false;
         this.tableFile = tableFile;
+        this.tableFilePath = null;
+    }
+
+    public SparseIndexQuery(SparseIndex index, Path tableFilePath){
+        this.index = index;
+        this.switchToFileChannel = true;
+        this.tableFilePath = tableFilePath;
+        this.tableFile = null;
     }
 
     public void setPositionListByKey(String key){
@@ -40,8 +62,25 @@ public class SparseIndexQuery {
 
     byte[] readSegment(long start, long len) throws IOException {
         byte[] segment = new byte[(int) len];
-        tableFile.seek(start);
-        tableFile.read(segment);
+
+        if (!switchToFileChannel){
+            assert tableFile != null;
+            tableFile.seek(start);
+            tableFile.read(segment);
+        }
+        else
+        {
+            assert this.tableFilePath != null;
+            try(FileChannel ch = FileChannel.open(this.tableFilePath, READ)){
+                ByteBuffer buf = ByteBuffer.allocate((int) len);
+                ch.position(start);
+                ch.read(buf);
+                if (buf.hasArray()) {
+                    segment = buf.array();
+                }
+            }
+        }
+
         return segment;
     }
 
