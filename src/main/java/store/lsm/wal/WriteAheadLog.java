@@ -5,27 +5,23 @@ import store.lsm.block.impl.BlockOperation;
 import store.lsm.index.Index;
 
 import java.io.*;
-import java.util.TreeMap;
 
 public class WriteAheadLog extends RandomAccessFile implements Closeable {
-    @Deprecated
-    private static final String FILE_MODE = "rw";
     private static final String WRITE_AHEAD_LOG = "log";
     private static final String WRITE_AHEAD_LOG_TMP = "logTmp";
-    @Deprecated
     private final RandomAccessFile writeAheadLog;
     private final File walFile;
 
     public WriteAheadLog(String dataDir) throws FileNotFoundException {
-        super(new File(dataDir + WRITE_AHEAD_LOG), FILE_MODE);
+        super(new File(dataDir + WRITE_AHEAD_LOG), "rw");
         this.walFile = new File(dataDir + WRITE_AHEAD_LOG);
-        this.writeAheadLog = new RandomAccessFile(walFile, FILE_MODE);
+        this.writeAheadLog = new RandomAccessFile(walFile, "rw");
     }
 
     public WriteAheadLog(File walFile) throws FileNotFoundException {
-        super(walFile, FILE_MODE);
+        super(walFile, "rw");
         this.walFile = walFile;
-        this.writeAheadLog = new RandomAccessFile(walFile, FILE_MODE);
+        this.writeAheadLog = new RandomAccessFile(walFile, "rw");
     }
 
     @Deprecated

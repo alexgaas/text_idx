@@ -17,15 +17,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.TreeMap;
 
 public class StructuredStringTable implements Closeable {
     private static final String TABLE = ".table";
-    @Deprecated
-    private static final String FILE_MODE = "rw";
     private TableMetaData tableMetaData;
     private SparseIndex sparseIndex;
-    @Deprecated
     private RandomAccessFile tableFile;
 
     private final String filePath;
@@ -41,7 +37,7 @@ public class StructuredStringTable implements Closeable {
     }
 
     private void initTableFileToZeroPosition(String filePath) throws IOException {
-        this.tableFile = new RandomAccessFile(filePath, FILE_MODE);
+        this.tableFile = new RandomAccessFile(filePath, "rw");
         tableFile.seek(0);
     }
 

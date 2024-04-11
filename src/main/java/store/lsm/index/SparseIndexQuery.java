@@ -17,7 +17,6 @@ import static java.nio.file.StandardOpenOption.*;
 public class SparseIndexQuery {
     private final SparseIndex index;
 
-    @Deprecated
     private final RandomAccessFile tableFile;
 
     private final Path tableFilePath;
@@ -28,7 +27,6 @@ public class SparseIndexQuery {
     private IndexPosition latestMinimalPosition = null;
     private IndexPosition earliestMaximalPosition = null;
 
-    @Deprecated
     public SparseIndexQuery(SparseIndex index, RandomAccessFile tableFile){
         this.index = index;
         this.switchToFileChannel = false;

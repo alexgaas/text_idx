@@ -1,12 +1,9 @@
 package store.lsm.table;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 
 import static java.nio.file.StandardOpenOption.*;
@@ -33,7 +30,6 @@ public class TableMetaData {
     public long version;
     private Path filePath;
 
-    @Deprecated
     public TableMetaData(){
     }
 
@@ -93,7 +89,6 @@ public class TableMetaData {
         }
     }
 
-    @Deprecated
     public void write(RandomAccessFile file) throws IOException {
         // since all  metadata have same type as [long] we can just write them sequentially as:
         // | segmentSize | dataStart | dataLen | indexStart | indexLen | version |
@@ -112,7 +107,6 @@ public class TableMetaData {
         // |      3      |     0     |    566  |     566    |    123   |    0    |
     }
 
-    @Deprecated
     public static TableMetaData read(RandomAccessFile file) throws IOException {
         TableMetaData TableMetaData = new TableMetaData();
         long fileLen = file.length();
