@@ -24,7 +24,6 @@ public class WriteAheadLog extends RandomAccessFile implements Closeable {
         this.writeAheadLog = new RandomAccessFile(walFile, "rw");
     }
 
-    @Deprecated
     public void restoreFromLog(Index index) throws IOException {
         long start = 0;
         writeAheadLog.seek(start);
@@ -41,12 +40,6 @@ public class WriteAheadLog extends RandomAccessFile implements Closeable {
             start += valueLen;
         }
         writeAheadLog.seek(writeAheadLog.length());
-    }
-
-    public Index restoreFromLog() throws IOException {
-        Index index = new Index();
-        restoreFromLog(index);
-        return index;
     }
 
     public void renameLogFileToCopy(){

@@ -82,7 +82,7 @@ public class Lsm implements Store {
             index.put(key, block);
 
             if (index.size() > storeThreshold) {
-                switchIndex();
+                shiftIndex();
                 dropToTable();
             }
         } catch (Throwable t) {
@@ -93,9 +93,8 @@ public class Lsm implements Store {
 
     }
 
-    private void switchIndex() {
+    private void shiftIndex() {
         try {
-            indexLock.writeLock().lock();
             immutableIndex = index;
             index = new Index();
             writeAheadLog.close();
@@ -104,17 +103,12 @@ public class Lsm implements Store {
             writeAheadLog = new WriteAheadLog(dataDir);
         } catch (Throwable t) {
             throw new RuntimeException(t);
-        } finally {
-            indexLock.writeLock().unlock();
         }
     }
 
     private void dropToTable() {
         try {
-            StructuredStringTable ssTable = StructuredStringTable.createFromIndex(
-                    dataDir,
-                    segmentSize,
-                    immutableIndex);
+            StructuredStringTable ssTable = StructuredStringTable.createFromIndex(dataDir, segmentSize, immutableIndex);
             tables.addFirst(ssTable);
 
             immutableIndex = null;
@@ -167,7 +161,7 @@ public class Lsm implements Store {
             writeAheadLog.write(bytes);
             index.put(key, rmBlock);
             if (index.size() > storeThreshold) {
-                switchIndex();
+                shiftIndex();
                 dropToTable();
             }
         } catch (Throwable t) {

@@ -5,6 +5,10 @@ The project `text_idx` is effective _Java_-based implementation of:
 
 ### Explanation
 
+LSM `put` API design flow:
+
+<img src="./plots/LSM_put_kv.png" alt="">
+
 ### Results
 Developer API and results shown in the unit test 
 [LsmTest.java](https://github.com/alexgaas/text_idx/blob/4b60ce1ee2f15a0b2d309917737d63314628a58e/src/test/java/lsm/LsmTest.java)
@@ -39,6 +43,8 @@ deprecated and have to be replaced with `FileChannel`. Details in this article -
   https://github.com/alexgaas/java_file_io
 - there is no `BloomFilter`
 - no effective benchmark tests
+- to run unit tests successfully following folders in `src/test/resources` must be created before run:
+`lsm`, `metadata`, `sparse_index`, `sstable`, `wal`
 
 ### License
 MIT - https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt
