@@ -1,9 +1,14 @@
 # text_idx
-The project `text_idx` is effective _Java_-based implementation of:
-- sparse index by many structured files and effective search by index
-- log-structured merge tree (within structured string table and write ahead log)
+The `text_idx` project offers an efficient Java-based implementation of two key functionalities:
 
-### Explanation
+- `Sparse Indexing`: It provides a mechanism for creating sparse indexes using N structured files, 
+facilitating effective search operations based on these indexes. This approach allows for efficient retrieval of data 
+based on specific criteria, enhancing the performance of search operations.
+- `Log-Structured Trees (LST)`: The project also includes a log-structured tree implemented within a structured string table, 
+along with a write-ahead log. This architecture enables efficient storage and retrieval of data, with changes logged 
+in a structured manner to ensure data integrity and consistency.
+
+### Implementation
 
 **LSM** `put` / `remove` API design flow:
 
