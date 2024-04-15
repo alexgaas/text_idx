@@ -24,7 +24,13 @@ public class WriteAheadLog extends RandomAccessFile implements Closeable {
         this.writeAheadLog = new RandomAccessFile(walFile, "rw");
     }
 
-    public void restoreFromLog(Index index) throws IOException {
+    public Index restoreFromLog() throws IOException {
+        Index index = new Index();
+        restoreFromLog(index);
+        return index;
+    }
+
+    private void restoreFromLog(Index index) throws IOException {
         long start = 0;
         writeAheadLog.seek(start);
         while (start < writeAheadLog.length()) {

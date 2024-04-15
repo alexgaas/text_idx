@@ -45,7 +45,7 @@ public class WriteAheadLogTest {
             writeAheadLog.writeInt(bytes.length);
             writeAheadLog.write(bytes);
 
-            writeAheadLog.restoreFromLog(index);
+            index.putAll(writeAheadLog.restoreFromLog());
             assertEquals(2, index.size());
         }
     }

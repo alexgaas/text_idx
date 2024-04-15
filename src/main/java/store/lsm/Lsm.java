@@ -33,12 +33,12 @@ public class Lsm implements Store {
     private WriteAheadLog writeAheadLog;
 
     public Lsm(String dataDir, int storeThreshold, int segmentSize) {
-        try {
-            this.dataDir = dataDir;
-            this.storeThreshold = storeThreshold;
-            this.segmentSize = segmentSize;
-            this.indexLock = new ReentrantReadWriteLock();
+        this.dataDir = dataDir;
+        this.storeThreshold = storeThreshold;
+        this.segmentSize = segmentSize;
+        this.indexLock = new ReentrantReadWriteLock();
 
+        try {
             tables = new LinkedList<>();
             index = new Index();
 
@@ -51,18 +51,8 @@ public class Lsm implements Store {
 
             TreeMap<Long, StructuredStringTable> ssTableTreeMap = new TreeMap<>(Comparator.reverseOrder());
             for (File file : files) {
-                String fileName = file.getName();
-                if (WriteAheadLog.tempLogExists(file)){
-                    writeAheadLog.restoreFromLog(index);
-                }
-                if (StructuredStringTable.exists(file)){
-                    int dotIndex = fileName.indexOf(".");
-                    Long time = Long.parseLong(fileName.substring(0, dotIndex));
-                    ssTableTreeMap.put(time, StructuredStringTable.createFromFile(file.getAbsolutePath()));
-                } else if (WriteAheadLog.logExists(file)){
-                    writeAheadLog = new WriteAheadLog(file);
-                    writeAheadLog.restoreFromLog(index);
-                }
+                initIndex(file);
+                initTables(file, file.getName(), ssTableTreeMap);
             }
             tables.addAll(ssTableTreeMap.values());
         } catch (Throwable t) {
@@ -70,16 +60,32 @@ public class Lsm implements Store {
         }
     }
 
-    @Override
-    public void put(String key, String value) {
+    private void initIndex(File file) throws IOException {
+        if (WriteAheadLog.tempLogExists(file)){
+            index.putAll(writeAheadLog.restoreFromLog());
+        }
+        else if (WriteAheadLog.logExists(file)){
+            writeAheadLog = new WriteAheadLog(file);
+            index.putAll(writeAheadLog.restoreFromLog());
+        }
+    }
+
+    private static void initTables(File file, String fileName, TreeMap<Long, StructuredStringTable> ssTableTreeMap) throws IOException {
+        if (StructuredStringTable.exists(file)){
+            int dotIndex = fileName.indexOf(".");
+            Long time = Long.parseLong(fileName.substring(0, dotIndex));
+            ssTableTreeMap.put(time, StructuredStringTable.createFromFile(file.getAbsolutePath()));
+        }
+    }
+
+    private void upsert(Block block){
         try {
-            StBlock block = new StBlock(key, value);
             byte[] bytes = BlockOperation.toByteArray(block);
 
             indexLock.writeLock().lock();
             writeAheadLog.writeInt(bytes.length);
             writeAheadLog.write(bytes);
-            index.put(key, block);
+            index.put(block.getKey(), block);
 
             if (index.size() > storeThreshold) {
                 shiftIndex();
@@ -90,7 +96,18 @@ public class Lsm implements Store {
         } finally {
             indexLock.writeLock().unlock();
         }
+    }
 
+    @Override
+    public void put(String key, String value) {
+        StBlock block = new StBlock(key, value);
+        upsert(block);
+    }
+
+    @Override
+    public void remove(String key) {
+        RmBlock rmBlock = new RmBlock(key);
+        upsert(rmBlock);
     }
 
     private void shiftIndex() {
@@ -119,7 +136,6 @@ public class Lsm implements Store {
         }
     }
 
-
     @Override
     public String get(String key) {
         try {
@@ -147,27 +163,6 @@ public class Lsm implements Store {
             throw new RuntimeException(t);
         } finally {
             indexLock.readLock().unlock();
-        }
-    }
-
-    @Override
-    public void remove(String key) {
-        try {
-            indexLock.writeLock().lock();
-            RmBlock rmBlock = new RmBlock(key);
-            byte[] bytes = BlockOperation.toByteArray(rmBlock);
-
-            writeAheadLog.writeInt(bytes.length);
-            writeAheadLog.write(bytes);
-            index.put(key, rmBlock);
-            if (index.size() > storeThreshold) {
-                shiftIndex();
-                dropToTable();
-            }
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
-        } finally {
-            indexLock.writeLock().unlock();
         }
     }
 
