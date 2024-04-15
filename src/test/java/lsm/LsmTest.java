@@ -41,4 +41,79 @@ public class LsmTest {
             }
         }
     }
+
+    @Test
+    public void testPutOperations() throws IOException {
+        try(Store lsm = new Lsm(baseTestPath, 2, 3)) {
+            lsm.put("1", "value1");
+            /*
+            log:
+            0000 0029 7b22 7479 7065 223a 2253 4554
+            222c 226b 6579 223a 2231 222c 2276 616c
+            7565 223a 2276 616c 7565 3122 7d
+             */
+
+            lsm.put("2", "value2");
+            lsm.put("3", "value3");
+            /*
+            log - empty
+
+            1713212049079.table:
+            {
+                "1":"{\"type\":\"SET\",\"key\":\"1\",\"value\":\"value1\"}",
+                "2":"{\"type\":\"SET\",\"key\":\"2\",\"value\":\"value2\"}",
+                "3":"{\"type\":\"SET\",\"key\":\"3\",\"value\":\"value3\"}"
+            }
+            {
+                "1":{"start":0,"len":181}
+            }
+             */
+
+
+            lsm.put("4", "value4");
+            /*
+            log:
+
+            0000 0029 7b22 7479 7065 223a 2253 4554
+            222c 226b 6579 223a 2234 222c 2276 616c
+            7565 223a 2276 616c 7565 3422 7d
+
+            1713212240256.table:
+            {
+                "1":"{\"type\":\"SET\",\"key\":\"1\",\"value\":\"value1\"}",
+                "2":"{\"type\":\"SET\",\"key\":\"2\",\"value\":\"value2\"}",
+                "3":"{\"type\":\"SET\",\"key\":\"3\",\"value\":\"value3\"}"
+            }
+            {
+                "1":{"start":0,"len":181}
+            }
+             */
+
+            lsm.put("5", "value5");
+            lsm.put("6", "value6");
+            /*
+            log - empty
+
+            1713212503730.table:
+            {
+                "1":"{\"type\":\"SET\",\"key\":\"1\",\"value\":\"value1\"}",
+                "2":"{\"type\":\"SET\",\"key\":\"2\",\"value\":\"value2\"}",
+                "3":"{\"type\":\"SET\",\"key\":\"3\",\"value\":\"value3\"}"
+            }
+            {
+                "1":{"start":0,"len":181}
+            }
+
+            1713212503798.table:
+            {
+                "4":"{\"type\":\"SET\",\"key\":\"4\",\"value\":\"value4\"}",
+                "5":"{\"type\":\"SET\",\"key\":\"5\",\"value\":\"value5\"}",
+                "6":"{\"type\":\"SET\",\"key\":\"6\",\"value\":\"value6\"}"
+            }
+            {
+                "4":{"start":0,"len":181}
+            }
+             */
+        }
+    }
 }

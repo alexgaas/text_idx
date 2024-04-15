@@ -5,13 +5,17 @@ The project `text_idx` is effective _Java_-based implementation of:
 
 ### Explanation
 
-LSM `put` / `remove` API design flow:
+**LSM** `put` / `remove` API design flow:
 
 <img src="./plots/LSM_put_kv.png" alt="">
 
-LSM `get` API design flow:
+**LSM** `get` API design flow:
 
 <img src="./plots/LSM_get_kv.png" alt="">
+
+**LSM** `put` / `get` data flow:
+
+<img src="./plots/LSM_flow.png" alt="">
 
 ### Results
 Developer API and results shown in the unit test 

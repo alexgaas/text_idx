@@ -60,6 +60,10 @@ public class Lsm implements Store {
         }
     }
 
+    public Lsm(String dataDir, int storeThreshold) {
+        this(dataDir, storeThreshold, storeThreshold);
+    }
+
     private void initIndex(File file) throws IOException {
         if (WriteAheadLog.tempLogExists(file)){
             index.putAll(writeAheadLog.restoreFromLog());

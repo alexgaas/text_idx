@@ -41,8 +41,8 @@ public class StructuredStringTable implements Closeable {
         tableFile.seek(0);
     }
 
-    private static StructuredStringTable fromIndex(String filePath, int partSize, Index index) throws IOException {
-        StructuredStringTable ssTable = new StructuredStringTable(filePath, partSize);
+    private static StructuredStringTable fromIndex(String filePath, int segmentSize, Index index) throws IOException {
+        StructuredStringTable ssTable = new StructuredStringTable(filePath, segmentSize);
         ssTable.initFromIndex(index);
         return ssTable;
     }
