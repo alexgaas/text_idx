@@ -21,16 +21,21 @@ The `text_idx` project API and data flows are presented below:
 <img src="./plots/LSM_flow.png" alt="">
 
 Implementation includes:
-- `block` module (`src/main/java/store/lsm/block`). `Block` is minimal unit of data/operation. Block operation is defined by semantic of block class (`St` / `Rm`).
-- `index` API (`src/main/java/store/lsm/index`) includes definition of index and sparse index. More important is it have a sparse index query implementation.
-For details please see `src/main/java/store/lsm/index/SparseIndexQuery.java` class. Full explanation of how sparse index works please see 
-`src/test/java/lsm/index/SparseIndexTest.java`.
-- `table` (structured string table) API. Every table must have table metadata (`src/main/java/store/lsm/table/TableMetaData.java`) and N
-segments (serialized blocks by index). Whole implementation of `sstable` in the `src/main/java/store/lsm/table/StructuredStringTable.java`.
-- `wal` implements [write ahead log](https://en.wikipedia.org/wiki/Write-ahead_logging):
-`src/main/java/store/lsm/wal/WriteAheadLog.java`.
-- `lsm` implements developer API (`src/main/java/store/lsm/Lsm.java`) to CRUD key/value entities and orchestration logic between
-write ahead log and set of structured string files for effective CRUD operations.
+
+- **Block**: Located at src/main/java/store/lsm/block, the Block module serves as the fundamental unit for data and operations. 
+Block operations are defined by the semantics of the Block class, utilizing operations such as `St` (Store) and `Rm` (Remove).
+- **Index**: The index API, found at `src/main/java/store/lsm/index`, encompasses the definition of both index 
+and sparse index structures. Notably, it includes an implementation for sparse index queries. For detailed insights into 
+sparse index functionality, refer to the `src/main/java/store/lsm/index/SparseIndexQuery.java` class, and for a 
+comprehensive understanding, explore `src/test/java/lsm/index/SparseIndexTest.java`.
+- **Structured string table**: The table module provides an API for structured string tables. Each table consists of table metadata, 
+defined in `src/main/java/store/lsm/table/TableMetaData.java`, and `N` segments containing serialized blocks indexed appropriately. 
+The entire `sstable` implementation is encapsulated within `src/main/java/store/lsm/table/StructuredStringTable.java`.
+- **Write Ahead Log (WAL)**: The wal module is responsible for implementing the Write Ahead Log concept, as described in 
+write ahead logging. This functionality is realized in `src/main/java/store/lsm/wal/WriteAheadLog.java`.
+- **LSM (Log-Structured Tree)**: The lsm module serves as the developer API, residing in `src/main/java/store/lsm/Lsm.java`. 
+It facilitates the CRUD operations for key/value entities and manages the orchestration logic between the Write Ahead Log 
+and the structured string files to ensure efficient CRUD operations.
 
 ### Results
 Developer API and results shown in the unit test 
