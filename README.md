@@ -9,18 +9,28 @@ along with a write-ahead log. This architecture enables efficient storage and re
 in a structured manner to ensure data integrity and consistency.
 
 ### Implementation
+The `text_idx` project API and data flows are presented below:
 
-**LSM** `put` / `remove` API design flow:
-
+#### `put` / `remove` API flow:
 <img src="./plots/LSM_put_kv.png" alt="">
 
-**LSM** `get` API design flow:
-
+#### `get` API flow:
 <img src="./plots/LSM_get_kv.png" alt="">
 
-**LSM** `put` / `get` data flow:
-
+#### `put` / `get` data flow:
 <img src="./plots/LSM_flow.png" alt="">
+
+Implementation includes:
+- `block` module (`src/main/java/store/lsm/block`). `Block` is minimal unit of data/operation. Block operation is defined by semantic of block class (`St` / `Rm`).
+- `index` API (`src/main/java/store/lsm/index`) includes definition of index and sparse index. More important is it have a sparse index query implementation.
+For details please see `src/main/java/store/lsm/index/SparseIndexQuery.java` class. Full explanation of how sparse index works please see 
+`src/test/java/lsm/index/SparseIndexTest.java`.
+- `table` (structured string table) API. Every table must have table metadata (`src/main/java/store/lsm/table/TableMetaData.java`) and N
+segments (serialized blocks by index). Whole implementation of `sstable` in the `src/main/java/store/lsm/table/StructuredStringTable.java`.
+- `wal` implements [write ahead log](https://en.wikipedia.org/wiki/Write-ahead_logging):
+`src/main/java/store/lsm/wal/WriteAheadLog.java`.
+- `lsm` implements developer API (`src/main/java/store/lsm/Lsm.java`) to CRUD key/value entities and orchestration logic between
+write ahead log and set of structured string files for effective CRUD operations.
 
 ### Results
 Developer API and results shown in the unit test 
@@ -51,6 +61,9 @@ try(Store lsm = new Lsm(baseTestPath, 4, 3)) {
 ```
 
 ### TODO
+- `merge` phase is not implemented yet
+- `serde` (serialization / deserialization) level is not separated from LSM. It is though mixed up -
+I used manual byte serialization / deserialization for write ahead log and `ObjectMapper` for string structured tables
 - `text_idx` uses `RandomAccessFile` for most of IO operations. This IO API in fact is
 deprecated and have to be replaced with `FileChannel`. Details in this article -
   https://github.com/alexgaas/java_file_io

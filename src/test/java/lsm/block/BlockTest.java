@@ -33,7 +33,7 @@ public class BlockTest {
         var result = BlockOperation.toBlock(value);
         assertEquals(block, result);
 
-        // test StBlock
+        // test RmBlock
         block = new RmBlock("testKey");
         value = mapper.readTree(block.toString());
         result = BlockOperation.toBlock(value);
