@@ -67,13 +67,11 @@ public class SparseIndexIntegrationTest {
         var result = idxQuery.queryByKey(key);
 
         assertEquals(key, result.getKey());
-
     }
 
     @Test
     public void testQueryByKey() throws IOException {
         SparseIndex sparseIndex = table.GetSparseIndex();
-        // RandomAccessFile tableFile = table.GetTableFile();
         SparseIndexQuery idxQuery = new SparseIndexQuery(sparseIndex, Path.of(table.GetFilePath()));
 
         /* let's find [key4]
@@ -93,6 +91,5 @@ public class SparseIndexIntegrationTest {
         var result = idxQuery.queryByKey(key);
 
         assertEquals(key, result.getKey());
-
     }
 }

@@ -16,7 +16,8 @@ The storage system plays a crucial role by handling the following responsibiliti
 - Access Control and Synchronization
 - Data Replication
 
-#### How to store data in the merge tree
+#### LSM basic concepts
+
 If we need to store data, most logical way to build data would store data along with **index**. Index is a key to allow
 not read/scan all the data, but rather than, to find particular set of data by key. Most obvious (and though very 
 effective by write amplification) way to build that key is `BTree` data structure. For that case, `BTree` is going to 
@@ -75,8 +76,53 @@ must have only one file **ordered by primary key**
 - That's how we come to LSM - log-structured (write-ahead log) merge tree (N string structured files, 
 that is actually not a tree, just number of files on the disk)
 
-Big disadvantage of this structure is bad write amplification since we have to merge (eg. re-write and delete) same data 
-few or many times.
+Cons of LSM:
+- bad write amplification since we have to merge (eg. re-write and delete) same data few or many times
+- LSM tree can be ordered only by ONE key / index (but you may add additional secondary/bookmark indexes)
+
+#### Sparse index
+The key idea of sparse index to make index which will address not every key but define interval wherein we can scan data
+to get value we're looking up. That is possible because data is placed _in order_. Why would we build sparse index at all 
+instead of simple (and more effective) index? 
+Depends on implementation of index and length of row, index may take in addition 
+50% of row length or even more what is no acceptable (for example, if you have 100MB of raw data, index may take 50MB in addition to 100!). 
+Assuming you can have reasonable intervals to scan inside sparse index it may reduce size of your index N times accordingly,
+but you will get additional latency because in case of sparse index you will need to read M times more data inside of interval.
+
+Searching by sparse index interval can be presented as simple algorithm:
+
+Let's make segment size as **3**:
+```text
+1 - key0 | key1 | key2 |
+2 - key3 | key4 | key5 |
+3 - key6 | key7 | key8 |
+```
+
+Then, let's find **[key4]**:
+```text
+for k in [key0, key3, key6]
+ if k compareTo key <= 0
+    fill lastSmallPosition
+ else
+    fill firstBigPosition
+
+1: latestMinimalPosition = key0, earliestMaximalPosition = null
+2: latestMinimalPosition = key3, earliestMaximalPosition = null
+3: latestMinimalPosition = key3, earliestMaximalPosition = key6
+```
+Since we may add few queries we need to reflect all that positions into list (linked list in mine implementation):
+```text
+if (latestMinimalPosition != null)
+    list add latestMinimalPosition
+
+if (earliestMaximalPosition != null)
+    list add earliestMaximalPosition
+```
+And finally to get the widest interval on yours queries:
+```text
+IndexPosition firstKeyPosition = sparseKeyPositionList.getFirst();
+IndexPosition lastKeyPosition = sparseKeyPositionList.getLast();
+```
 
 ### Implementation
 The `text_idx` project API and data flows are presented below:
@@ -136,7 +182,8 @@ try(Store lsm = new Lsm(baseTestPath, 4, 3)) {
 ```
 
 ### TODO
-- `merge` phase is not implemented yet
+- `merge` phase is not implemented
+- no `checksum` validation
 - `serde` (serialization / deserialization) level is not separated from LSM. It is though mixed up -
 I used manual byte serialization / deserialization for write ahead log and `ObjectMapper` for string structured tables
 - `text_idx` uses `RandomAccessFile` for most of IO operations. This IO API in fact is
